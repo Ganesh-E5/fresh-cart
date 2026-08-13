@@ -121,6 +121,15 @@ export const updateCategoryController = async (req, res) => {
 export const deleteCategoryController = async (req, res) => {
     try {
         const { id } = req.params;
+
+        const productUsingCatgeory = await Product.findOne({ Category_id: id });
+        if (productsUsingCategory) {
+            return res.status(400).json({
+                code: "CATEGORY_IN_USE",
+                message: "Cannot delete category — products still reference it",
+            });
+        }
+        
         const deletedCategory = await Category.findOneAndDelete({ _id: id });
         if (!deletedCategory) {
             return res.status(404).json({

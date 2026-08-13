@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/authRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import productVariantRoutes from "./routes/productVariantRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -17,6 +19,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/product", productRoutes);
+app.use("/api/product-variant", productVariantRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
