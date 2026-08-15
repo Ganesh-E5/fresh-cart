@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
             required: [true, "Phone nubmer is required"],
             match: [/^\d{10}$/, "Invalid phone number"],
         },
-        house_no: {
+        houseNo: {
             type: String,
             required: [true, "House number is required"],
         },
@@ -67,14 +67,22 @@ const UserSchema = new mongoose.Schema({
         },
         country: {
             type: String,
-            required: [true, "Country is required"],
             default: "India",
         },
         isDefault: {
             type: Boolean,
             default: false,
-        }
+        },
     }],
+
+        resetPasswordToken:{
+            type:String,
+            select:false,
+        },
+        resetPasswordExpires:{
+type:Date,
+select:false,
+        },
 }, {
     timestamps: true,
 });

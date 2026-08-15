@@ -6,10 +6,10 @@ const OrderItemSchema = mongoose.Schema({
         ref:'Order',
         required:[true,'Order is required'],
     },
-    product_id:{
+    product_variant_id:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Product',
-        required:[true,'Product is required'],
+        ref:'ProductBriefly',
+        required:[true,'Product variant is required'],
     },
     sku:{
         type:String,
