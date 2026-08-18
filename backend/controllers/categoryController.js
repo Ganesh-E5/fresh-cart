@@ -28,6 +28,12 @@ export const createCategoryController = async (req, res) => {
         })
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                code: "CATEGORY_EXISTS",
+                message: "Category already exists",
+            });
+        }
         console.error(error);
 
         return res.status(500).json({
@@ -110,6 +116,12 @@ export const updateCategoryController = async (req, res) => {
             category,
         })
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                code: "CATEGORY_EXISTS",
+                message: "A category with this name already exists",
+            });
+        }
         console.error(error);
         return res.status(500).json({
             code: "INTERNAL_SERVER_ERROR",
@@ -129,7 +141,7 @@ export const deleteCategoryController = async (req, res) => {
                 message: "Cannot delete category — products still reference it",
             });
         }
-        
+
         const deletedCategory = await Category.findOneAndDelete({ _id: id });
         if (!deletedCategory) {
             return res.status(404).json({

@@ -54,6 +54,14 @@ export const signupController = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(400).json({
+                code: "DUPLICATE_FIELD",
+                field,
+                message: `${field} already exists`,
+            });
+        }
         console.error(error);
         return res.status(500).json({
             code: "INTERNAL_SERVER_ERROR",

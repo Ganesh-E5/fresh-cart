@@ -48,6 +48,12 @@ export const createProductVariantController = async (req, res) => {
         })
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                code: "SKU_EXISTS",
+                message: "This SKU already exists for this product",
+            });
+        }
         console.error(error);
         return res.status(500).json({
             code: "INTERNAL_SERVER_ERROR",
@@ -223,6 +229,12 @@ export const updateProductVariantController = async (req, res) => {
         })
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                code: "SKU_EXISTS",
+                message: "This SKU already exists for this product",
+            });
+        }
         console.error(error);
         return res.status(500).json({
             code: "INTERNAL_SERVER_ERROR",
