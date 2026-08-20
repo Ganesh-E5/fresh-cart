@@ -79,6 +79,7 @@ export const loginController = async (req, res) => {
         if (!user) {
             return res.status(400).json({
                 code: "USER_NOT_FOUND",
+                field: "email",
                 message: "No user found",
             });
         }
@@ -88,6 +89,7 @@ export const loginController = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({
                 code: "WRONG_PASSWORD",
+                field: "password",
                 message: "Password is wrong",
             });
         }
