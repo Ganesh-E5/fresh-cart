@@ -1,5 +1,5 @@
 import Category from "../models/Category.js";
-
+import Product from "../models/Product.js";
 export const createCategoryController = async (req, res) => {
     try {
         const {
@@ -102,7 +102,7 @@ export const updateCategoryController = async (req, res) => {
         const category = await Category.findOneAndUpdate(
             { _id: id },
             { $set: updatedFields },
-            { new: true, runValidators: true }
+            { returnDocument: "after", runValidators: true }
         );
         if (!category) {
             return res.status(404).json({
@@ -134,7 +134,7 @@ export const deleteCategoryController = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const productUsingCatgeory = await Product.findOne({ Category_id: id });
+        const productsUsingCategory = await Product.findOne({ Category_id: id });
         if (productsUsingCategory) {
             return res.status(400).json({
                 code: "CATEGORY_IN_USE",
