@@ -177,8 +177,8 @@ function AdminCategories() {
                     </button>
                 </div>
 
-                <div className="p-5 flex flex-col gap-5">
-                    <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="p-5">
+                    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
                         <Input
                             {...register("name", {
                                 required: "Name is required"
@@ -202,7 +202,11 @@ function AdminCategories() {
                             )}
                         />
                         <ErrorMessage error={errors.img_url?.message} />
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="mt-10"
+                        >
                             {isSubmitting
                                 ? (isEditing ? "Updating..." : "Creating...")
                                 : (isEditing ? "Update Category" : "Create Category")}
