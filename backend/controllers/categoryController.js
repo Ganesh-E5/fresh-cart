@@ -134,7 +134,7 @@ export const deleteCategoryController = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const productsUsingCategory = await Product.findOne({ Category_id: id });
+        const productsUsingCategory = await Product.findOne({ category_id: id });
         if (productsUsingCategory) {
             return res.status(400).json({
                 code: "CATEGORY_IN_USE",
