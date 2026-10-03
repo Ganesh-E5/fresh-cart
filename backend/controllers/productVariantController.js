@@ -161,7 +161,15 @@ export const getAllProductsVariantController = async (req, res) => {
 export const getProductVariantByIdController = async (req, res) => {
     try {
         const { id } = req.params;
-        const product = await ProductBriefly.findById(id);
+        const product = await ProductBriefly.findById(id)
+            .populate({
+                path: "product_id",
+                select: "name description brand category_id",
+                populate: {
+                    path: "category_id",
+                    select: "name",
+                },
+            });
         if (!product) {
             return res.status(404).json({
                 code: "PRODUCT_NOT_FOUND",
@@ -213,8 +221,15 @@ export const updateProductVariantController = async (req, res) => {
             id,
             { $set: updatedFields },
             { new: true, runValidators: true },
-        );
-
+        ).populate({
+            path: "product_id",
+            select: "name description brand category_id",
+            populate: {
+                path: "category_id",
+                select: "name",
+            },
+        });
+        
         if (!product) {
             return res.status(404).json({
                 code: "VARIANT_NOT_FOUND",

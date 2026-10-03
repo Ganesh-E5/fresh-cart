@@ -11,6 +11,7 @@ import AdminOrders from "../pages/admin/AdminOrders";
 import AdminProducts from "../pages/admin/AdminProducts";
 import AdminProductVariants from "../pages/admin/AdminProductVariants";
 import AdminUsers from "../pages/admin/AdminUsers";
+import ProductListing from "../pages/ProductListing";
 
 const router = createBrowserRouter([
     {
@@ -28,10 +29,15 @@ const router = createBrowserRouter([
     },
     {
         element: <MainLayout />,
-        children: [{
-            path: "/",
-            element: <Home />
-        }
+        children: [
+            {
+                path: "/",
+                element: <Home />
+            },
+            {
+                path:"/products",
+                element: <ProductListing/>
+            }
         ]
     },
     {

@@ -3,11 +3,14 @@ import ErrorMessage from "./ErrorMessage";
 const Input = forwardRef(({
     className = "",
     options = [],
+    optionLabel="name",
+    optionValue="_id",
     type = "text",
     id,
     error,
     label,
     preview,
+    placeholder,
     ...props
 }, ref) => {
     return (
@@ -49,19 +52,19 @@ const Input = forwardRef(({
                             className={`peer p-2 border w-full rounded-sm outline-none ${className}`}
                             {...props}
                         >
-                            <option value="" disabled hidden>Select category</option>
+                            <option value="">{placeholder}</option>
                             {options.map((opt) => (
-                                <option key={opt._id} value={opt._id}>{opt.name}</option>
+                                <option key={opt[optionValue]} value={opt[optionValue]}>{opt[optionLabel]}</option>
                             ))}
                         </select>
                         <label
                             htmlFor={id}
                             className="
-            absolute left-2 top-2 bg-white px-1 text-gray-500
-            transition-all duration-150
-            peer-valid:-top-2 peer-valid:text-sm
-            peer-focus:-top-2 peer-focus:text-sm
-        "
+                            absolute left-2 top-2 bg-white px-1 text-gray-500
+                            transition-all duration-150
+                            peer-valid:-top-2 peer-valid:text-sm
+                            peer-focus:-top-2 peer-focus:text-sm
+                        "
                         >
                             {label}
                         </label>

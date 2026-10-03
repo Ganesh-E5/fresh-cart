@@ -9,6 +9,7 @@ import {
     updateProductVariant,
     deleteProductVariant,
 } from "../../api/productVariantApi";
+import { getAllCategories } from "../../api/categoryApi";
 import { getAllProducts } from "../../api/productApi";
 import toast from "react-hot-toast";
 import Loader from "../../components/common/Loader";
@@ -23,7 +24,9 @@ function AdminProductVariants() {
     const [panelMode, setPanelMode] = useState(null); // "create" | "edit" | null
     const [variants, setVariants] = useState([]);
     const [fetching, setFetching] = useState(false);
+    const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("");
     const [editingId, setEditingId] = useState(null);
     const [loadingId, setLoadingId] = useState(null);
     const [loadingAction, setLoadingAction] = useState(null);
@@ -32,6 +35,7 @@ function AdminProductVariants() {
         register,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
@@ -79,45 +83,66 @@ function AdminProductVariants() {
             await fetchVariants();
             setPanelMode(null);
             setEditingId(null);
+            setSelectedCategory("");
+            setProducts([]);
+            reset();
         } catch (error) {
             const validationErrors = error.response?.data?.errors;
-        if (validationErrors?.length > 0) {
-            toast.error(validationErrors.map(e => e.msg).join(", "), {
-                id: "variant-curd-error"
-            });
-        } else {
-            toast.error(error.response?.data?.message || "Something went wrong", {
-                id: "variant-curd-error"
-            });
-        }oast.error(error.response?.data?.message || "Something went wrong", {
-                id: "variant-curd-error",
-            });
+            if (validationErrors?.length > 0) {
+                toast.error(validationErrors.map(e => e.msg).join(", "), {
+                    id: "variant-curd-error"
+                });
+            } else {
+                toast.error(error.response?.data?.message || "Something went wrong", {
+                    id: "variant-curd-error"
+                });
+            }
         }
     };
-const fetchVariants = async () => {
-    setFetching(true);
-    try {
-        const res = await getAllProductVariants();
-        setVariants(res.products);
-        toast.success("Variants fetched successfully", {
-            id: "variants-fetch-success"
-        });
-    } catch (error) {
-        console.error(error);
-        toast.error(error.response?.data?.message || "Something went wrong", {
-            id: "variants-fetch-error",
-        });
-    } finally {
-        setFetching(false);
-    }
-};
-
-    const fetchProducts = async () => {
+    const fetchVariants = async () => {
+        setFetching(true);
         try {
-            const res = await getAllProducts();
-            setProducts(res.products);
+            const res = await getAllProductVariants();
+            setVariants(res.products);
+            toast.success("Variants fetched successfully", {
+                id: "variants-fetch-success"
+            });
         } catch (error) {
             console.error(error);
+            toast.error(error.response?.data?.message || "Something went wrong", {
+                id: "variants-fetch-error",
+            });
+        } finally {
+            setFetching(false);
+        }
+    };
+    const fetchCategories = async () => {
+        try {
+            const res = await getAllCategories();
+            setCategories(res.categories);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        if (panelMode) {
+            fetchCategories();
+        }
+    }, [panelMode]);
+
+    const fetchProducts = async (categoryId) => {
+        try {
+            const res = await getAllProducts({
+                category_id: categoryId,
+                limit: 1000,
+            });
+
+            setProducts(res.products);
+            return res.products;
+        } catch (error) {
+            console.error(error);
+            return [];
         }
     };
 
@@ -129,10 +154,11 @@ const fetchVariants = async () => {
     useEffect(() => {
         fetchVariants();
     }, []);
-
     useEffect(() => {
-        fetchProducts();
-    }, [panelMode]);
+        if (selectedCategory) {
+            fetchProducts(selectedCategory);
+        }
+    }, [selectedCategory]);
 
     const handleEdit = async (id) => {
         setLoadingId(id);
@@ -141,8 +167,11 @@ const fetchVariants = async () => {
             const res = await getProductVariantById(id);
             const variant = res.product;
             setEditingId(id);
+            setPanelMode("edit");
+            console.log(variant);
+            console.log(variant.product_id);
             reset({
-                product_id: variant.product_id?._id || variant.product_id,
+                product_id: variant.product_id._id || variant.product_id,
                 img_url: variant.img_url,
                 size: variant.size,
                 unit: variant.unit,
@@ -152,8 +181,13 @@ const fetchVariants = async () => {
                 qty: variant.qty,
                 rating: variant.rating,
             });
-            setPanelMode("edit");
+            setSelectedCategory(variant.product_id.category_id._id);
+            const products = await fetchProducts(variant.product_id.category_id._id);
+            setValue("product_id", variant.product_id._id);
         } catch (error) {
+            console.log(error);
+            console.log(error.response);
+            console.log(error.response?.data);
             toast.error(error.response?.data?.message || "Something went wrong", {
                 id: "variant-fetch-error",
             });
@@ -196,6 +230,8 @@ const fetchVariants = async () => {
         }
     };
 
+    
+
     return (
         <div>
             <h1 className="text-2xl font-semibold text-slate-800 mb-6">Product Variants</h1>
@@ -208,6 +244,8 @@ const fetchVariants = async () => {
                     setPanelMode("create");
                     setEditingId(null);
                     reset({});
+                    setSelectedCategory("");
+                    setProducts([]);
                 }}
             />
             {fetching ? (
@@ -356,9 +394,31 @@ const fetchVariants = async () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
                         <Input
                             type="select"
+                            label="Category"
+                            id="category"
+                            options={categories}
+                            value={selectedCategory}
+                            placeholder="Select category"
+                            optionValue="_id"
+                            optionLabel="name"
+                            onChange={(e) => {
+                                const categoryId = e.target.value;
+
+                                setSelectedCategory(categoryId);
+
+                                setValue("product_id", "");
+
+                                fetchProducts(categoryId);
+                            }}
+                        />
+                        <Input
+                            type="select"
                             {...register("product_id", {
                                 required: "Product is required",
                             })}
+                            optionValue="_id"
+                            optionLabel="name"
+                            placeholder="Select product"
                             label="Product"
                             id="product_id"
                             error={errors.product_id?.message}

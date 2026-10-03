@@ -53,7 +53,7 @@ export const getAllProductsController = async (req, res) => {
     try {
         let {
             page = 1,
-            limit = 20,
+            limit = 10000,
             category_id,
             brand,
             search,
@@ -74,10 +74,12 @@ export const getAllProductsController = async (req, res) => {
             };
         }
         if (search) {
-            filter.name = {
-                $regex: search,
-                $options: "i"
-            };
+            filter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { brand: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+                { key_words: { $regex: search, $options: "i" } },
+            ];
         }
 
         const skip = (page - 1) * limit;

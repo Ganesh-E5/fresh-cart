@@ -9,6 +9,7 @@ import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 import { X, Pencil, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
+import Pagination from "../../components/common/Pagination";
 
 function AdminProducts() {
     const [search, setSearch] = useState("");
@@ -19,6 +20,8 @@ function AdminProducts() {
     const [editingId, setEditingId] = useState(null);
     const [loadingId, setLoadingId] = useState(null);
     const [loadingAction, setLoadingAction] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState(null);
     const {
         register,
         reset,
@@ -57,7 +60,7 @@ function AdminProducts() {
                 , {
                     id: panelMode === "create" ? "product-create" : "product-update"
                 });
-            await fetchProducts();
+            await fetchProducts(currentPage, search);
             setPanelMode(null);
             setEditingId(null);
         } catch (error) {
@@ -66,14 +69,17 @@ function AdminProducts() {
             });
         }
     }
-    const fetchProducts = async () => {
+    const fetchProducts = async (page = currentPage, searchText = search) => {
         setFetching(true);
         try {
-            const res = await getAllProducts();
+            const res = await getAllProducts({
+                page,
+                limit: 100,
+                search: searchText,
+            });
             setProducts(res.products);
-            toast.success("Products fetched successfully", {
-                id: "products-fetch-success"
-            })
+            setPagination(res.pagination);
+            setCurrentPage(page);
         } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.message || "Something went wrong", {
@@ -93,13 +99,17 @@ function AdminProducts() {
         }
     };
 
-    const filteredProducts = products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-    )
+    const handleSearch = async () => {
+        await fetchProducts(1, search);
+    }
+
+    const handlePageChange = (page) => {
+        fetchProducts(page, search);
+    };
 
     useEffect(() => {
         fetchProducts();
-    }, [])
+    }, []);
 
     useEffect(() => {
         fetchCategories();
@@ -149,12 +159,14 @@ function AdminProducts() {
             const res = await deleteProduct(id);
 
             toast.success(res.message || "Product deleted successfully", {
-                id: "product-delete-success"
+                id: "product-delete-success",
             });
 
-            setProducts(prev =>
-                prev.filter(product => product._id !== id)
-            );
+            if (products.length === 1 && currentPage > 1) {
+                await fetchProducts(currentPage - 1, search);
+            } else {
+                await fetchProducts(currentPage, search);
+            }
         } catch (error) {
             toast.error(
                 error.response?.data?.message || "Something went wrong",
@@ -172,6 +184,7 @@ function AdminProducts() {
                 search={search}
                 onSearchChange={setSearch}
                 searchPlaceholder="Search products..."
+                onSearch={handleSearch}
                 createLabel="Create Product"
                 onCreateClick={() => {
                     setPanelMode("create")
@@ -180,12 +193,14 @@ function AdminProducts() {
                 }}
             />
             {fetching ? (
-                <Loader />
-            ) : filteredProducts.length === 0 ? (
+                <div className="min-h-screen flex justify-center items-center">
+                    <Loader />
+                </div>
+            ) : products.length === 0 ? (
                 <p className="text-slate-500 text-sm" >No products found</p>
             ) : (
                 <div className="w-full rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div className="max-h-200 overflow-auto">
+                    <div className="max-h-175 overflow-auto">
                         <table className="min-w-225 w-full border-collapse">
                             <thead className="bg-slate-100 sticky top-0 z-20">
                                 <tr>
@@ -214,13 +229,13 @@ function AdminProducts() {
                             </thead>
 
                             <tbody>
-                                {filteredProducts.map((product, index) => (
+                                {products.map((product, index) => (
                                     <tr
                                         key={product._id}
                                         className="group border-t border-slate-200 hover:bg-slate-50 transition"
                                     >
                                         <td className="sticky left-0 z-10 bg-white px-4 py-3 font-medium text-slate-800">
-                                            {index + 1}
+                                            {(currentPage - 1) * 100 + index + 1}
                                         </td>
 
                                         <td className="px-4 py-3 font-medium text-slate-800">
@@ -279,6 +294,12 @@ function AdminProducts() {
                     </div>
                 </div>
             )}
+            <Pagination
+                currentPage={currentPage}
+                totalPages={pagination?.totalPages}
+                onPageChange={handlePageChange}
+            />
+
 
             <div
                 className={`
@@ -325,8 +346,11 @@ function AdminProducts() {
                             })}
                             label="Category"
                             id="category_id"
+                            placeholder="Select category"
                             error={errors.category_id?.message}
                             options={categories}
+                            optionValue="_id"
+                            optionLabel="name"
                         />
                         <Input
                             {...register("brand")}

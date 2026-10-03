@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import AdminSidebar from "../admin/AdminSidebar";
 import { useState } from "react";
 import { Menu, X } from "lucide-react"
+import Navbar from "./Navbar";
 export const AuthLayout = () => {
     return (
         <>
@@ -13,7 +14,12 @@ export const AuthLayout = () => {
 export const MainLayout = () => {
     return (
         <>
+        <div className="relative">
+            <div className="sticky top-0 z-50">
+            <Navbar />
+            </div>
             <Outlet />
+        </div>
         </>
     )
 }
@@ -54,7 +60,7 @@ export const AdminLayout = () => {
                 />
             )}
 
-            <div className="flex-1 bg-slate-100 p-6 pt-20 md:pt-6">
+            <div className="flex-1 min-w-0 bg-slate-100 p-6 pt-20 md:pt-6 overflow-x-hidden">
                 <Outlet />
             </div>
         </div>

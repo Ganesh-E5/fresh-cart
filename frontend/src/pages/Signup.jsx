@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import toast from "react-hot-toast"
 import { Link } from 'react-router-dom'
+import { useFormSubmit } from "../hooks/useFormSubmit";
 
 function Signup() {
     const {
         register,
         handleSubmit,
         setError,
+        clearErrors,
         setFocus,
         watch,
         formState: { isSubmitting, errors }
@@ -23,7 +25,7 @@ function Signup() {
     const onSubmit = async (data) => {
         try {
             await signup(data);
-            toast.success("Account created successfully!");
+            toast.success("Account created successfully!", { id: "signup-success" });
             navigate("/login")
         } catch (error) {
             if (!error.response) {
@@ -31,7 +33,7 @@ function Signup() {
                     type: "server",
                     message: "Something went wrong. Please try again."
                 });
-                toast.error("Something went wrong. Please try again.");
+                toast.error("Something went wrong. Please try again.", { id: "signup-error" });
                 return;
             }
 
@@ -50,9 +52,10 @@ function Signup() {
                 type: "server",
                 message
             })
-            toast.error(message);
+            toast.error(message, { id: "signup-error" });
         }
     }
+    const onFormSubmit = useFormSubmit(handleSubmit, clearErrors, onSubmit)
     return (
         <><div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-gray-200">
             <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-10">
@@ -61,7 +64,7 @@ function Signup() {
                     Create your Fresh Cart account and start shopping.
                 </p>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-5">
+                <form onSubmit={onFormSubmit} className="mt-10 space-y-5">
                     <Input
                         {...register("username", {
                             required: "Username is required",

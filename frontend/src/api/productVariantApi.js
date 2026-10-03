@@ -5,8 +5,8 @@ export const createProductVariant = async (data) => {
     return res.data;
 }
 
-export const getAllProductVariants = async () => {
-    const res = await api.get("/product-variant");
+export const getAllProductVariants = async (params = {}) => {
+    const res = await api.get("/product-variant",{params});
     return res.data;
 }
 

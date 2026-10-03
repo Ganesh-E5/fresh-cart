@@ -6,11 +6,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/authApi";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth.js";
+import { useFormSubmit } from "../hooks/useFormSubmit.js";
+
 function Login() {
     const {
         register,
         handleSubmit,
         setError,
+        clearErrors,
         formState: { errors, isSubmitting },
     } = useForm();
 
@@ -19,12 +22,17 @@ function Login() {
     const onSubmit = async (data) => {
         try {
             const response = await login(data);
-            toast.success("Login successfull");
+            toast.success("Login successfull", { id: "login-success" });
             loginUser(
                 response.user,
                 response.token
             )
-            navigate("/");
+
+            if (response.user.role === 'admin') {
+                navigate("/admin")
+            } else {
+                navigate("/")
+            }
         } catch (error) {
             if (!error.response) {
                 const message = "Something went wrong. Please try again.";
@@ -34,7 +42,7 @@ function Login() {
                     message
                 });
 
-                toast.error(message);
+                toast.error(message, { id: "login-error" });
                 return;
             }
 
@@ -54,9 +62,10 @@ function Login() {
                 message
             });
 
-            toast.error(message);
+            toast.error(message, { id: "login-error" });
         }
     }
+    const onFormSubmit = useFormSubmit(handleSubmit, clearErrors, onSubmit);
 
     return (
         <>
@@ -66,7 +75,10 @@ function Login() {
                     <p className="text-center text-gray-500 mt-2 mb-8">
                         Sign in to continue
                     </p>
-                    <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-5">
+                    <form
+                        onSubmit={onFormSubmit}
+                        className="mt-10 space-y-5"
+                    >
                         <Input
                             {...register("email", {
                                 required: "Email is required",
