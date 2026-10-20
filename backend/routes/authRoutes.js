@@ -10,8 +10,7 @@ const router = Router();
 router.post('/signup', signupValidator, validate, signupController);
 router.post('/login', loginValidator, validate, loginController);
 
-
 router.post('/forgot-password', forgotPasswordValidator, validate, forgotPasswordController);
-router.post('/reset-password', resetPasswordValidator, validate, resetPasswordController);
+router.post('/reset-password/:token', resetPasswordValidator, validate, resetPasswordController);
 
 export default router;

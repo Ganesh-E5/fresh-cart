@@ -43,7 +43,7 @@ export const getAllProductsValidator = [
 
     query("limit")
         .optional()
-        .isInt({ min: 1, max: 100000 }).withMessage("Limit must be between 1 and 100")
+        .isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100")
         .toInt(),
 
     query("category_id")

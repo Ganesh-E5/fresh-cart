@@ -19,7 +19,7 @@ body("items")
 
     body("paymentMethod")
         .notEmpty().withMessage("Payment method is required")
-        .isIn(["online","cashOnDelivery"]).withMessage("Invalid payment method")
+        .isIn(["online","COD"]).withMessage("Invalid payment method")
         
 ]
 

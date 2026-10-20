@@ -60,10 +60,9 @@ export const forgotPasswordValidator = [
 ];
  
 export const resetPasswordValidator = [
-    body("token")
-        .trim()
+    param("token")
         .notEmpty().withMessage("Reset token is required"),
-    body("newPassword")
+    body("password")
         .notEmpty().withMessage("New password is required")
         .isLength({ min: 6 }).withMessage("New password must be at least 6 characters"),
 ];

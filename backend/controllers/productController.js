@@ -53,7 +53,7 @@ export const getAllProductsController = async (req, res) => {
     try {
         let {
             page = 1,
-            limit = 10000,
+            limit = 100,
             category_id,
             brand,
             search,

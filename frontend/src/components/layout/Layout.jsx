@@ -10,26 +10,29 @@ export const AuthLayout = () => {
         </>
     )
 }
-
 export const MainLayout = () => {
     return (
-        <>
-        <div className="relative">
-            <div className="sticky top-0 z-50">
-            <Navbar />
-            </div>
-            <Outlet />
+        <div className="min-h-screen bg-gray-50">
+
+            <header className="sticky top-0 z-50">
+                <Navbar />
+            </header>
+            
+            <main>
+                <Outlet />
+            </main>
+
         </div>
-        </>
     )
 }
+
 export const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
         <div className="flex min-h-screen">
             <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 bg-slate-800 text-white">
-                <span className="font-semibold">Fresh-Cart Admin</span>
+                <span className="font-semibold">Fresh-Cart</span>
                 <button onClick={() => setSidebarOpen(true)}>
                     <Menu size={24} />
                 </button>
@@ -60,7 +63,7 @@ export const AdminLayout = () => {
                 />
             )}
 
-            <div className="flex-1 min-w-0 bg-slate-100 p-6 pt-20 md:pt-6 overflow-x-hidden">
+            <div className="flex-1 min-w-0 max-h-screen bg-slate-100 p-6 pt-20 md:pt-6 overflow-x-hidden">
                 <Outlet />
             </div>
         </div>

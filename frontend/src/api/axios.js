@@ -5,14 +5,22 @@ const api = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-})
+});
 
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("freshcart-token");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("freshcart-token");
+        
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${token.replace(/^"|"$/g, '')}`;
+        }
+        
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-    return config;
-})
+);
 
 export default api;
