@@ -13,6 +13,7 @@ import {
 import useCart from "../hooks/useCart";
 import { getAddresses, addAddress, createOrder } from "../api/userService";
 import { getRazorpayKey, createPaymentOrder, verifyPayment } from "../api/paymentApi";
+
 export default function Checkout() {
     const navigate = useNavigate();
     const { items, cartTotal, clearCart } = useCart();
@@ -48,6 +49,9 @@ export default function Checkout() {
                 if (fetchedAddresses.length > 0) {
                     const defaultAddr = fetchedAddresses.find((a) => a.isDefault) || fetchedAddresses[0];
                     setSelectedAddressId(defaultAddr._id);
+                } else {
+                    // Auto-open address form if user has no saved addresses
+                    setShowAddressForm(true);
                 }
             } catch (err) {
                 console.error("Failed to fetch user addresses:", err);
@@ -66,6 +70,7 @@ export default function Checkout() {
 
     const handleAddAddress = async (e) => {
         e.preventDefault();
+        setErrorMsg("");
         try {
             const data = await addAddress(newAddress);
             const updatedAddresses = data?.addresses || [];
@@ -87,13 +92,15 @@ export default function Checkout() {
                 country: "India",
             });
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to add address");
+            setErrorMsg(err.response?.data?.message || "Failed to add address.");
         }
     };
 
     const handlePlaceOrder = async () => {
-        if (!selectedAddressId) {
-            setErrorMsg("Please select or add a delivery address.");
+        // Strict Guard Check: Prevent network request if no address is selected
+        if (!selectedAddressId || selectedAddressId.trim() === "") {
+            setErrorMsg("Please select or add a delivery address before placing your order.");
+            setShowAddressForm(true);
             return;
         }
 
@@ -114,9 +121,7 @@ export default function Checkout() {
                 clearCart();
                 const orderId = data.order._id;
                 navigate(`/orders/${orderId}`);
-            }
-
-            else {
+            } else {
                 const keyData = await getRazorpayKey();
                 const razorpayOrder = await createPaymentOrder(cartTotal);
 
@@ -152,13 +157,13 @@ export default function Checkout() {
                         }
                     },
                     prefill: {
-                        name: addresses.find(a => a._id === selectedAddressId)?.name || "Customer",
+                        name: addresses.find((a) => a._id === selectedAddressId)?.name || "Customer",
                         email: "customer@gmail.com",
-                        contact: addresses.find(a => a._id === selectedAddressId)?.phone || "9999999999"
+                        contact: addresses.find((a) => a._id === selectedAddressId)?.phone || "9999999999",
                     },
                     theme: {
-                        color: "#059669"
-                    }
+                        color: "#059669",
+                    },
                 };
 
                 const razorpay = new window.Razorpay(options);
@@ -318,10 +323,11 @@ export default function Checkout() {
                                 {addresses.map((addr) => (
                                     <label
                                         key={addr._id}
-                                        className={`relative cursor-pointer border rounded-xl p-4 flex flex-col justify-between transition ${selectedAddressId === addr._id
-                                            ? "border-emerald-600 bg-emerald-50/30 ring-1 ring-emerald-600"
-                                            : "border-slate-200 hover:border-slate-300"
-                                            }`}
+                                        className={`relative cursor-pointer border rounded-xl p-4 flex flex-col justify-between transition ${
+                                            selectedAddressId === addr._id
+                                                ? "border-emerald-600 bg-emerald-50/30 ring-1 ring-emerald-600"
+                                                : "border-slate-200 hover:border-slate-300"
+                                        }`}
                                     >
                                         <div className="flex items-start justify-between">
                                             <div>
@@ -354,10 +360,11 @@ export default function Checkout() {
 
                         <div className="space-y-3">
                             <label
-                                className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition ${paymentMethod === "COD"
-                                    ? "border-emerald-600 bg-emerald-50/30 ring-1 ring-emerald-600"
-                                    : "border-slate-200 hover:border-slate-300"
-                                    }`}
+                                className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition ${
+                                    paymentMethod === "COD"
+                                        ? "border-emerald-600 bg-emerald-50/30 ring-1 ring-emerald-600"
+                                        : "border-slate-200 hover:border-slate-300"
+                                }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <Truck className="text-slate-600" size={20} />
@@ -377,11 +384,11 @@ export default function Checkout() {
                             </label>
 
                             <label
-                                onClick={() => setPaymentMethod("ONLINE")}
-                                className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition ${paymentMethod === "ONLINE"
+                                className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition ${
+                                    paymentMethod === "ONLINE"
                                         ? "border-emerald-600 bg-emerald-50/30 ring-1 ring-emerald-600"
                                         : "border-slate-200 hover:border-slate-300"
-                                    }`}
+                                }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <CreditCard className="text-emerald-600" size={20} />
@@ -399,7 +406,6 @@ export default function Checkout() {
                                     className="accent-emerald-600"
                                 />
                             </label>
-
                         </div>
                     </div>
                 </div>
@@ -450,7 +456,7 @@ export default function Checkout() {
                         <button
                             onClick={handlePlaceOrder}
                             disabled={isPlacingOrder || !selectedAddressId}
-                            className="w-full mt-6 bg-emerald-600 text-white font-semibold py-3.5 rounded-xl hover:bg-emerald-700 transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2"
+                            className="w-full mt-6 bg-emerald-600 text-white font-semibold py-3.5 rounded-xl hover:bg-emerald-700 transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isPlacingOrder ? (
                                 <>
